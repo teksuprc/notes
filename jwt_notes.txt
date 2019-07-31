@@ -1,0 +1,12 @@
+
+#JWT Notes
+
+	are good for one time tokens
+
+##Where to Store
+	
+	####local storage
+		commonly stored in local storage
+		helps prevent CSRF (cross site request forgery)
+		
+	

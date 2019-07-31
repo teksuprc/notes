@@ -1,0 +1,305 @@
+
+react - 
+	no html template
+	uses shadow dom to compare versions in memory before display
+	
+	components
+	
+		// function vs class components
+		function components
+			simple
+			
+			const myComp = (props) => {
+				return (<domElementOrComponent ... />);
+			};
+			
+		class components
+			powerful
+			
+			// state - changed
+			// props - immutable
+			class myComp extends React.Component {
+				render() {
+					return (
+						<div className="container">
+							<h1>Starting</h1>
+						</div>
+					);
+				);
+			};
+			ReactDOM.render(<myComp/>, document.getElementById('root'));
+
+
+=======================================================================			
+// differences in jsx vs javascript
+
+function Hello() {
+  return <div style={{"color":"red"}}>Hello React!</div>;
+  // same as
+  // return Read.createElement('div', null, 'Hello React!');
+};
+
+ReactDOM.render(
+  //<Hello />,
+  //document.getElementById('mountNode')
+
+  // same as
+  React.createElement(Hello, null),
+  document.getElementById('mountNode')
+);
+=======================================================================
+
+
+=======================================================================
+// differences in jsx vs javascript
+
+function Button() {
+  //return <button type="button" style={{"color":"red"}}>Hello React!</button>;
+  return <button type="button" style={{"color":"red"}}>Hello React!</button>;
+};
+
+ReactDOM.render(
+  //<Hello />,
+  //document.getElementById('mountNode')
+
+  // same as
+  React.createElement(Button, null),
+  document.getElementById('mountNode')
+);
+=======================================================================
+
+
+=======================================================================
+// this.props 	- immutable list of properties associated w/ this component
+// useState 	- property and its update function
+	//const [cnt, setCnt] = useState(<initial cnt value>); - cnt is the variable; setCnt is the update function; and the initial value of cnt is set
+	//const [idx, setIdx] = useState(42); - add another useState for multiple state properties
+=======================================================================
+
+
+=======================================================================
+// multiple components on same page
+function Display() {
+  return (
+    <div>....</div>
+  );
+}
+
+ReactDOM.render(
+  //[<Button />,<Display />],
+  // or
+  <div>
+    <Display />
+    <Button />
+  </div>,
+  // or
+  <React.Fragment> or <>
+	<Display />
+	<Button />
+  </React.Fragment> or </>
+  document.getElementById('mountNode')
+);
+=======================================================================
+
+
+=======================================================================
+// parent component data flow DOWN to children components
+
+function Button(props) {
+  const handleClick = () => props.setCounter(props.counter+1);
+  return (
+    <button onClick={handleClick}>
+      {`Click to add +1`}
+    </button>
+  );
+}
+
+function Display(props) {
+  return (
+    <div>Count: {props.counter}</div>
+  );
+}
+
+function App() {
+  const [counter, setCounter] = useState(42);
+  return (
+    <div>
+      <Display counter={counter} />
+      <Button counter={counter} setCounter={setCounter} />
+    </div>
+  );
+}
+
+ReactDOM.render(
+  <App />,
+  document.getElementById('mountNode')
+);
+=======================================================================
+
+
+=======================================================================
+
+=======================================================================
+
+			
+=======================================================================
+	testing with jest
+
+tradeoffs
+	framework					library
+	concise						explicit
+	template-centric			javascript-centric
+	separate template			single file component
+	standard					non-standard
+	community backed			corporate backed
+	
+react
+	library
+		small in size
+	explicit
+		one way binding (must check state of variables)
+	javascript-centric
+		{isAdmin && <h1>Hi Admin</h1>} - isAdmin is a javascript variables
+		<button onclick={delete}>Delete</button> - call a function in react
+	single file
+		logic and markup in same file
+	standard
+		standard web components
+			templates - markup
+			custom elements 
+			shadow dom - encapsulates styling, avoids leaking
+			imports	 - bundles [html, js, css] into a single line
+			
+		web component standard
+			defines				library/framework
+			templates			jsx/js
+			custom elemetns		react component
+			shadow dom			css modules/css in js/inline
+			imports				one component per file
+	corporate backed
+		driven by Facebooks needs not mine
+		
+
+html vs jsx
+	for 							htmlFor
+	class							className
+	<style color="blue">			<style={{color:'blue'}}>
+	<!-- comment -->				{/* comment */}
+
+react needs to be built
+	everyone does a build
+	transpiles
+		babel
+		typescript
+		
+	boilerplates
+		create-react-app
+
+versions
+	cannot run 2 versions of react on the same page
+	build standard web components
+		svekle, stencil, skate
+	react router
+
+old react components
+	react-dom
+	create-react-class
+	prop-types
+	
+there are many ways to do things in react
+
+	dev environment
+		andrewhfarmer.com
+		create-react-app - official dev environment
+		
+		redux - state management
+		react router- routs
+		
+	ES classes or original createClass
+		createClass
+		
+			var createReactClass = require('create-react-class');
+			var Greeting = createReactClass({
+				render: function() {
+					return <h1>Hello</h1>;
+				}
+			});
+			
+		ES Class
+		
+			import React from 'react';
+			class Greeting extends React.Component {
+				render() {
+					return <h1>Hello</h1>;
+				}
+			}
+			
+	Types
+		react prop-types
+			Greeting.propTypes = {
+				name: PropTypes.string		- name is of type string
+			};
+
+		TypeScript
+			interface Props {
+				name: string
+			};
+			
+			function Greeting(props: Props) { return(<h1>Hello {props.name}</h1>) };
+		
+		Flow
+			types based on annotations
+			// @flow
+	
+	State management
+		flux
+			Facebook to centralize state
+		plain react
+			
+		redux
+			most popular
+			immutable
+		mobx
+			observables
+			
+	Styling
+		plain css
+		sass
+		css modules
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

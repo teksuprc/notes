@@ -1,0 +1,270 @@
+
+# kubernetes and docker notes
+
+
+## history
+
+	originated by google.
+		first there was borg
+		then omega
+		then kubernetes
+
+## short and skinny
+
+	docker
+		starts and stops and delete containers
+		think of docker as ESXi (the free hypervisor)
+		
+	k8s
+		cares about higher level stuff
+		how many containers
+		scale, healing, and updating containers
+		think of k8s as vCenter (the manager for all the ESXi servers)
+		can apply auto-scaling and de-scaling
+		can heal if a container goes down
+		
+		
+		
+## minikube
+	starts a local cluster with one node
+		holds a container runtimer (docker/rocket)
+		master:
+			api server
+		node
+		
+
+## old way to install kube on AWS
+	using kops (kubernetes operations)
+	pre-reqs
+		kubectl
+		kops
+		aws cli
+		
+		aws account - full access for
+			ec2
+			route 53
+			s3
+			iam
+			vpc
+	
+
+## manually installing kubernetes
+	installing k8s based on getting started with kubernetes video
+	pre-reqs
+		docker
+		kubelet	- node agent
+		kubeadm - builds/admin cluster
+		kubectl - kube client
+		cni - cni networking (container network interface)
+		
+		
+## working w/ pods
+	pod contains 1 or more containers
+	define a manifest file
+		give to api server
+	pod gets a single IP
+	inter-pod communications
+		every pod gets its own IP that is routable on the network
+	intra-pod
+		talk over shared localhost namespace
+		if multiple containers IPs need to be outside of pod... expose via ports
+	
+	#### lifecycle
+		create manifest file in json/yml
+		give file to api server
+		goes into pending state (downloads images)
+		once all containers are up and rdy - running
+		once all are running and good - succeeded
+		or it all failed - failed
+		pods are cattle... when killed a new one is deployed
+		
+	#### deploy pods
+		list nodes
+			kubectl get nodes
+		
+		manifest files used to generate pods
+			apiVersion: v1
+			kind: Pod								// tell k8s what kinds to deploy
+			metadata:								// you can put any key:value pair 
+			  name: hello-pod						
+			spec:									
+			  containers:							
+			  - name: hello-ctr						
+			    image: <docker image name:tag>		
+				ports:								
+				- containerPort: 8080				
+				
+		deploy the pod
+			kubectl create -f pod.yml				// -f file (yml or json file)
+			
+		check pod status
+			kubectl get pods 						//(show pods in default namespace)
+			kubectl get pods/<pod name>				// get single pod
+			kubectl get pods --all-namespaces		// gets all pods in all namespaces
+
+		descript pods and status
+			kubectl describe pods
+
+		delete pod
+			kubectl delete pods <pod name>
+	
+====================================================================================
+		
+	#### replication controller
+		specify pod and desired state
+			example that has 5 pods running
+			
+			repcon.yml
+			apiVersion: v1
+			kind: ReplicationController
+			metadata:
+			  name: hello-rc
+			spec:
+			  replicas: 5
+			  selector:
+			    app: hello-world 		// the pod name
+			  template:
+				metadata:
+				  labels:
+				    app: hello-world
+			    spec:
+				  containers:
+				  - name: hello-pod
+				    image: <docker image name:tag>
+					ports:
+					- containerPort: 8080
+	
+		apply changes to deployed pods
+			kubectl apply -f repcon.yml
+			
+		check status
+			kubectl get rc -o wide
+			
+			
+	#### services
+		is the actual endpoint for all pods
+		contains IP, DNS, and ports that never change
+		gets a static IP
+		gets a single dns entry
+		gets a port ie: 30050 which exposes all pods cluster wide
+			port is same on every node
+		when creating a services, its creating an endpoint for each pod
+		use labels to tie pods to service
+			use "zone" label or which ever you choose
+			
+		###### service discovery
+			running dns cluster addon
+				dns in the cluster
+			env variables (another way to discover, tougher)
+		
+		###### access from inside the cluster
+			
+	
+		###### access from outside the cluster
+	
+		deploy service and expose pods
+			kubectl expose rc hello-rc --name-hello-svc --target-port=8080 --type=nodePort
+
+		describe
+			kubectl describe svc hello-svc
+			NodePort is the cluster wide port to access
+			
+		get service
+			kubectl get svc
+
+====================================================================================
+
+all it again but with a yml file.
+	service manifest file
+		svc.yml
+		apiVersion: v1
+		kind: Service
+		metadata:
+		  name: hello-svc
+		  labels:
+		    app: hello-world
+		spec:
+		  type: NodePort	// service type ClusterIP (internal cluster ip), NodePort (exposes app outside of cluster), LoadBalancer (NodePort integrated into cloud-based load balancer)
+		  ports:
+		  - port: 8080	// containers port
+			nodePort: 30001		// exposed port
+		    protocol: TCP
+		  selector:				// has to match pods in replication controller
+		    app: hello-world
+			
+		
+	deploy service via yml file
+		kubectl create -f svc.yml
+			
+
+## Kubernetes Deployments
+
+	deploy.yml
+	apiVersion: extensions/v1beta1
+	kind: Deployment
+	metadata:
+	  name: hello-deploy
+	spec:
+	  replicas: 10
+	  minReadySeconds: 10	// wait 10s for pods to come up
+	  strategy:
+	    type: RollingUpdate
+		rollingUpdate:
+		  maxUnavailable: 1
+		  maxSurge: 1
+	  template:
+	    metadata:
+		  labels:
+		  app: hello-world
+		spec:
+		  containers:
+		  - name: hello-pod
+		    image: <docker image name:tag>
+			ports:
+			- containerPort: 8080
+	
+	// create a new one
+	kubectl create -f deploy.yml
+	
+	// update existing one
+	kubectl apply -f deploy.yml --record		// record changes as audit versions
+	
+	// check rollout status
+	kubectl rollout status deployment hello-deploy
+	
+	// roll back to previous revision
+	kubectl rollout undo deployment hello-deploy --to-revision=1
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

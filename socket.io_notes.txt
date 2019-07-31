@@ -1,0 +1,9 @@
+
+
+connection options
+	cookieHttpOnly = true	// cookie cannot be accessed by javascript
+	pintTimeout = 30000 	// 30 secs before connection is considered closed
+	pintInterval = 30000	// 30 secs between ping packets
+	
+	pingTimeout + pintInterval = when the connection is closed
+	

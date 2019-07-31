@@ -1,0 +1,40 @@
+jenkins pipeline notes
+
+scripted pipeline:
+
+node {
+	state('Example') {
+		... do stuff
+		
+		try {
+			sh 'pwd'
+		}
+		catch(err) {
+			echo 'failed to do stuff'
+			throw
+		}
+	}
+}
+
+Steps:
+	tells jenkins what to do. basic building block for both declarative and scripted pipeline syntax.
+	
+Nodes:
+	is a step that does 2 things:
+		1) schedules steps, adding to build queue.
+		2) creates a workspace, file dir, workspaces last for the duration of the task.
+		
+Stage:
+	is a step that calls supported APIs. each stage can have 1 or more build steps.
+		
+master:
+	basic install of jenkins on a computer. handles tasks for build system. 
+		pipeline scripts are parsed on master.
+		steps wrapped in node blocks are performed on executors.
+		
+agent:
+	(slave) is a computer used to offload projects from master. operations are performed by executors.
+	
+executor:
+	computational resource for compiling code. run on master or agents.
+	

@@ -1,0 +1,56 @@
+
+Starting a new project
+
+1) npm init
+	creates package.json
+	
+2) npm i
+	react
+	react-dom
+	
+3) npm i -D
+	babel-core
+	babel-loader
+	babel-preset-env
+	babel-preset-react
+	
+4) npm i -D
+	webpack
+	webpack-cli
+	webpack-dev-server
+	html-webpack-plugin
+	
+5) mkdir src/app.js
+
+6) index.html
+
+7) webpack.config.js
+	const path = require('path');
+	const hwp = require('html-webpack-plugin');
+
+	module.exports = {
+		entry: path.join(__dirname, '/src/app.js'),
+		output: {
+			filename: 'bundle.js',
+			path: path.join(__dirname, '/dist')
+		},
+		module: {
+			rules: [{
+				test: /\.(js|jsx)$/,
+				exclude: /node_modules/,
+				loader: 'babel-loader'
+			}]
+		},
+		plugins: [
+			new hwp({template: path.join(__dirname, '/src/index.html')})
+		]
+	};
+	
+8) .babelrc
+	{
+		"presets": [
+			"env",
+			"react"
+		]
+	}
+	

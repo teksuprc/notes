@@ -1,0 +1,55 @@
+
+# AWS Lambda Notes
+
+## Lambda
+
+    only worried about code
+    auto scales
+    max 15 minutes (900)
+    only tcp/ip supported
+    
+    used w/ API gateway you can control throttling
+    available in all availability zones and regions
+
+    java
+        MyOutput handlerName(MyEvent event, Context ctx) {}
+
+    Output handlerName(event, context)
+
+    push, pull, or direction call to activate function
+
+    deployment packages
+        node, python, java, c#
+            zip files
+        npm/pip         maven      nuget
+        root level         /lib     dll's at root level
+
+    architecture
+        code handler -> lambda func -> IAM allow lambda to assume role -> upload code
+         -> lambda call -> aws cloudwatch
+
+    possible need to use Route53 for endpoints
+
+    trust and access policies
+
+    push model
+        needs trust policy
+        resource policy
+
+    pull model
+        needs trust policy
+        needs execution policy
+
+    lambda layers
+        centrally manage code across multiple functions
+        also for shared deps
+
+    pricing
+        execution, memory, and runtime in ms
+
+    triggers not available
+        alexa
+        glacier deep archive
+        lambda events (high side)
+
+

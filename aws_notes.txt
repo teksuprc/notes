@@ -1,0 +1,501 @@
+// dockerfile
+FROM ubuntu
+
+# Install apache and remove the list of packages downloaded from apt-get update
+RUN apt-get update -y && \
+apt-get install -y apache2 && \
+rm -r /var/lib/apt/lists/*
+
+# Copy the website into the apache web root directory
+COPY webtest /var/www/html
+
+EXPOSE 80
+
+CMD ["apachectl", "-D", "FOREGROUND"]
+
+
+
+
+# sites:
+https://online.vitalsource.com/#/
+https://aws.qwiklabs.com/classrooms/24906
+
+lab code
+http://bit.ly/2MPJQWE
+
+marketplace poc
+    
+
+training
+    aws.training
+   
+certs
+    aws.amazon.com/certifications
+
+
+# Developing on C2S
+
+## Day 1
+=============================================
+### 0 Overview
+
+### 1 Intro to AWS
+
+	IaaS - infrastructure as a service
+	PaaS - platform as a service
+	SaaS - software as a service
+
+	Data Center - aka Availability Zones
+	Region - different geographical locations... 
+		multiple Availability Zones
+
+	console/cli/sdk -> API (with IAM) -> Endpoints
+
+	SAM - Serverless architecture model
+		test API's w/o getting charged for the actual service
+
+	EndPoints
+		sevices site in 3 different locations
+			Global
+			Regional
+			Availability Zone
+
+
+	Regional Assets
+		S3 bucket
+
+	Availability Zone Assets (multiple AZ deployments)
+		EBS
+		EC2
+
+	S3 select with Athena - ????
+
+	**** NOTE: Cloudwatch gathers metrics... Off by default
+
+	Unmanaged services
+		EC2
+
+	Managed Services
+		lambda
+		sqs
+		elb
+
+	S3 has triggers
+
+
+	Load Balancing
+		classic elb (elastic load balancing)
+			master of all trades
+			http/s, tcp, ssl
+
+		application (alb)
+			http/s
+
+		network (nlb)
+			tcp, ssl
+			high traffic
+
+	Sticky Sessions
+		binding session state to machine (Do Not Use)
+		Use a Cache to offload state (nosql)
+		
+
+
+### 2 Intro to Dev on C2S
+
+	getting started
+		need credentials
+		
+			global account
+				IAM
+					users
+						physical credentials
+						access key/secret key
+						username/password
+						
+						policy defines user permissions to services/resources
+
+					groups
+					
+					
+					roles
+		
+		install aws sdk
+	
+		policies
+			are permissions on either users, groups, or roles
+			
+
+	environment
+	
+		toolkits and cli
+		
+	command line format
+		aws 	<service> 	<sub command> 	<parameters>
+		aws 	ec2 		stop-instances 	--instance-id i-1234567890
+		
+		aws help
+		aws ec2 help
+		aws describe-instances help
+		
+	connect to a service
+
+		resources have endpoints
+
+		service client api (more details)
+			def listClient()
+			s3client = boto3.client('s3')
+			response = s3Client.list_objects_v2(Bucket='mybucket')
+		
+			
+		resource api (easy to use)
+	
+	exceptions and errors
+		
+		every language/lib has its own
+	
+	dev tools
+		
+		cloud 9
+			
+		x-ray
+			manage a chain of lambdas
+
+
+	IAM
+		shared responsiblity model
+			AWS - physical security of infrastructure
+			
+			customer - platform, app, IAM, OS, network, and firewall config
+			
+		**** Security Groups
+				virtual firewal around resources
+				control inbound/outbound traffic
+		
+		subnet controls
+			NACLs - network access control lists
+			control subnet level access to resources
+			
+		credentials check by AWS
+			code
+			environment variables
+				AWS_ACCESS_KEY_ID
+				AWS_SECRET_ACCESS_KEY
+			linux
+				~/.aws/credentials
+			windows
+				%UserProfile%/.aws/credentials
+			ec2 instance role
+			
+	##### Lab 1
+		http://bit.ly/2MPJQWE
+		region: us-west-2
+
+	#### S3
+	
+		object storage
+		static web hosting (static html files... can use javascript)
+			need bucket configuration
+			give public read access
+				use cloudfront to protect the site... OAI with cloudfront
+		
+		endpoint
+			https://s3-<region>.amazonaws.com/<bucket name>/
+			treat it like a domain name
+			
+			bucket name with '.' will break ssl
+			do not use '_'
+			only lower case letters, numbers, and '-'
+			
+		version enabled from bucket
+		object locking... prevent deletion
+		
+			
+
+### 3 Intro to IAM
+
+### 4 Intro to lab environment
+
+### 5 Dev S3
+
+
+
+## Day 2
+=============================================
+### 6 Dynamo
+
+
+
+### 7 Lambda
+
+    only worried about code
+    auto scales
+    max 15 minutes (900)
+    only tcp/ip supported
+    
+    used w/ API gateway you can control throttling
+    available in all availability zones and regions
+
+    java
+        MyOutput handlerName(MyEvent event, Context ctx) {}
+
+    Output handlerName(event, context)
+
+    push, pull, or direction call to activate function
+
+    deployment packages
+        node, python, java, c#
+            zip files
+        npm/pip         maven      nuget
+        root level         /lib     dll's at root level
+
+    architecture
+        code handler -> lambda func -> IAM allow lambda to assume role -> upload code
+         -> lambda call -> aws cloudwatch
+
+    possible need to use Route53 for endpoints
+
+    trust and access policies
+
+    push model
+        needs trust policy
+        resource policy
+
+    pull model
+        needs trust policy
+        needs execution policy
+
+    lambda layers
+        centrally manage code across multiple functions
+        also for shared deps
+
+    pricing
+        execution, memory, and runtime in ms
+
+    triggers not available
+        alexa
+        glacier deep archive
+        lambda events (high side)
+
+
+### 8 API Gateway
+
+    front door to all of your resources
+    access using IAM and/or cognito
+    
+    create api methods to access backend services
+
+    regional and edge locations
+
+    
+    #### Cognito
+        
+        custom user access requirements
+        get back jwt tokens
+        3 types of tokens
+            identity
+            access
+            refresh
+
+    #### SAM
+
+        used for testing serverless services
+        
+
+### 9 SQS & SNS
+
+    SQS
+        queuing service
+
+        dlq - dead letter queue. Dump unprocessed messages for manual review
+
+    SNS
+        simple notification service
+        message notifications
+        publish to topic...
+        subscribers get the msg from topic
+            lambda, sqs, http/s, email, sms, mobile
+
+
+### 10 Step Functions
+
+    great for changing workflows
+
+    breakup monolithic code into microservices
+
+    
+
+### 11 Elasticache
+
+
+
+## Day 3
+=============================================
+
+### what we dont talk about
+
+### AWS Diode
+
+    cross domain transfer of data
+    only low to up
+    
+
+### AWS Marketplace
+    
+    35 categories of software/subscriptions/etc...
+        
+
+### 12 Containers
+
+    runs on ec2 instances
+        loads docker
+
+    lifecycle
+        source code -> code repo -> build environment 
+            -> artifact repo -> test environment -> deployment environment
+
+    container
+        app/app endpoint
+
+    development
+        dockerfile (template)
+            container image
+                docker run -it
+
+    ECR - container registry (docker repo)
+        fully managed
+        secure encrypted at rest, IAM
+
+    Docker Hub
+    Private Repos
+
+    services
+        ecs - docker deployments
+        eks - kubernetes
+        fargate - easier
+        ecr - elastic container registry
+
+           
+
+
+### 13 Secure Solutions
+	end to end
+
+    
+
+### 14 Dev Apps
+
+    aws elastic beanstalk
+        throw applications and it handles deployment
+
+
+### 15 Wrap up
+
+
+=============================================
+### What to Know
+	Java, C#/.Net, Python, JavaScript
+	
+### Architecture
+	SDK -> API -> AWS Services
+
+
+
+lab 7 rules:
+
+1) verify ec2 instances and cognito are in same region
+2) do not generate api client secret
+3) be weary of passwords generated on cognito app client
+4) verify your dynamo tables are in same region
+5) verify your s3 bucket in same region
+6) verify your api gateway is in same region
+7) unable to verify secret hash for client... you messed up on #2 - restart lab
+8) give permissions in IAM to see db
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

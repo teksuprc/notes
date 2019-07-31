@@ -1,0 +1,500 @@
+
+# Dependencies
+
+fs-extra
+	add missing elements from 'fs' and new methods
+	outputJson,readJson,writeJson,copy
+	
+axios
+	a promise based http client
+
+rxjs
+	reactive extentions
+	
+Q (q)
+	a promise step library
+
+sequelize
+	sql library for node
+
+
+# Advanced Node
+
+### Global only global variables
+		process
+			bridge node and its running env
+			process.env - copy of user env with variables
+			read from config module
+				export const config = {
+					port: process.env.PORT || 8080
+				};
+			stdread
+			stdout
+			stderr
+			process is an event emitter
+			
+			process.on('exit', (code) => {});	// node is going to shutdown, cannot use event loop here... only sync ops
+				.on('uncaughtException', (err) => {}	// catch uncaught exceptions
+				
+			// keep event loop bz
+			process.stdin.resume();
+			
+			process.exit(code);		
+			// codes
+				0 - exit normally
+				1 - exit with failure
+				
+
+		buffer 
+			holds binary data in bytes
+			needs char encoding
+			cannot be resized
+			used for TCP streams/Binary data/Images
+			use StringDecoder, **instead of ".toString()" on Buffer**, to work with data
+				const { StringDecoder } = require('string_decoder');
+				const decoder = new StringDecoder('utf8');
+				process.stdin.on('readable', () => {
+					const chunk = process.stdin.read();
+					if(chunk != null) {
+						const buffer = Buffer.from([chunk]);
+						console.log('with .toString()', buffer.toString());				// byte array
+						console.log('with StringDecoder', decoder.write(buffer));		// actual char
+					}
+				});
+			
+			usage:
+				new Buffer();
+				new Buffer(10);			// deprecated
+				Buffer.alloc(8);		// create filled sized buffer
+				Buffer.allocUnsafe();	// memory in buffer is NOT zeroed out
+				Buffer.from('touche');
+					console.log(buffer, buffer.length); // expected - <Buffer 74 6f 75 63 68 c3 a9> 7
+					
+		how require really works
+			resolving - fine actual path
+			loading - load thefile
+			wrapping - wrap the class
+			evaluating - 
+			caching
+			
+		module
+			id
+			exports
+			parent
+			filename
+			loaded
+			children
+			paths - the local path . all the way up to the root path for node
+				node_modules
+				users/node_modules
+				users/user/node_modules
+				users/user/<node path>
+				
+			use require.resolve('<file>'); to find a module w/o using its
+			
+		folder modules
+			<findmeModule>/index.js
+				use a package.json file and add
+					{
+						"name": "find-me",		// module name
+						"main": "start.js"		// file that needs to be loaded
+					}
+			
+		circular module dependency
+			allowed in node
+		
+	
+	JSON and C++ Addons
+		require('something');
+		node tries to load
+			1) try xxx.js
+			2) try xxx.json
+			3) try xxx.node
+			
+			
+		load json file
+		data.json  
+		{
+			values: [
+				{id: 1, t: 'hi'},
+				{id: 2, t: 'there'}
+			]
+		}
+		
+		const data = require('./data.json');
+		console.log('data 1', data.values[0]); 		// expect - {id:1, t:'hi'}
+		
+		C++ addon
+			hello.cpp
+			#include <node.h>
+			namespace demo {
+				using v8::FunctionCallbackInfo;
+				using v8::Isolate;
+				using v8::Local;
+				using v8::Object;
+				using v8::String;
+				using v8::Value;
+			
+				void Method(const FunctionCallbackInfo<Value>& args) {
+					Isolate* isolate = args.GetIsolate();
+					args.GetReturnValue().Set(String::NewFromUtf8(isolate, 'world'));
+				}
+				
+				void init(Local<Object> exports) {
+					NODE_SET_METHOD(exports, 'hello', Method);
+				}
+				
+				NODE_MODULE(addon, init);
+			}
+			============================================================
+			// node file
+			const addon = require('addon');
+			console.log(addon.hello());
+
+	Wrapping and Caching Modules
+		node wraps code in a function(exports, module,require, __filename, __dirname)
+			
+		running code as script and module
+			if(require.main == module) {
+				// running as a script
+				console.log('args', process.argv); // [] of arguments
+			}
+			else {
+				// being required
+				module.exports = () => { console.log('function call'); };
+			}
+			
+		Caching
+			node caches the first call and does not load any other call
+			
+	Installing packages
+		npm ls --depth=0 to see info about package and deps
+		npm ll - info about package
+		npm i --dry-run // list which package that will be installed
+		npm i --json // output in json
+			i -S  // prod dependency (--save)
+			i -D  // dev dependency (--save-dev)
+			i -O  // optional dependency
+			
+		npm update	// updates all packages
+			update [`, <, >, =, 4.*, 4.x] // specify the version
+				~1.2	= versions greater than 1.2
+				^		= does not mod left most
+			
+			outdated 	// check if packages are outdated
+			
+			
+		npm config list config -l
+		npm config set save true	// always use --save
+		
+		npm search <name>		// search packages
+		npm shrinkwrap			// locks down npm package versions
+		
+		npm home lodash			// open home page of package
+		npm repo lodash			// opens repo page
+		npm prune				// removes unsaved packages
+		
+		npm xmas
+		
+		
+
+### Concurrency Model and Event Loop
+	based on event model
+		called Event Loop
+		
+	I/O
+		communication from process and external to the process
+
+	handle slow i/o
+		sync			// slow
+		fork			// wont scale
+		threads			// tough to program
+		event loop		// handles events w/o blocking
+			loop that picks events from the queue and pushes callbacks to the stack
+			
+	V8
+		heap/stack
+			stack - all calls are placed onto the stack (FILO/LIFO)
+			heap - all objects stored in memory
+			
+		
+### Callbacks, Promises, Async/Await
+	
+	##### Use both promise and callback interfaces:
+	
+		let pc = (num, callback = () => {}) => {
+			return new Promise((resolve, reject) => {
+				let err = "we caught an error";
+				let data = num + 42;
+				
+				// DO SOME LONG RUNNING PROCESS HERE...
+
+				if(typeof num !== 'number') {
+					reject(err);
+					return callback(err, null);
+				}
+				else {
+					resolve(data);
+					return callback(null, data);
+				}
+			});
+		};
+		
+		// callback version
+		pc('err', (err, data) => {
+			if(err) console.error('pc(err) error:', err);
+			else console.log('pc(err) data:', data);
+		});
+		
+		// promise version
+		pc(44)
+			.then(data => {
+				console.log('pc(44):', data);
+			})
+			.catch(err => {
+				console.error('pc(44) catch error:', err);
+			});
+
+		async function getData() {
+			try {
+				const num = 42;
+				const val = await pc(num);
+				console.log('getData():', val);
+			}
+			catch(err) {
+				console.error('getData():', err);
+			}
+		};
+		
+		getData();
+			
+			
+	##### Async Function
+		treat async code as normal sync code
+		
+		
+	##### Callbacks and Event Emitters
+	
+		callbacks are NOT async, and are used for state changes
+
+		class extends EventEmitter
+			.emit('name') 				- use to invoke an event
+			.on('name', callback) 		- use to handle the event
+		
+		// need to learn
+		...args 						- array object with values of the parameters passed to a function
+		
+		// handle the errors by .on('error') event handler
+			class WithTime extends EventEmitter {
+				this.execute(asyncFunc, ...args) {
+					asyncFunc(...args, (err, data) => {
+						if(err) return this.emit('error', err);
+						this.emit('data', data);
+					});
+				}
+			}
+			
+			const wt = new WithTime();
+			wt.on('error', (err) => console.log(err));		// handles errors caught from executed functions
+			wt.execute(fs.readFile, '');					// <-- throws an error... but is caught and does not crash
+			wt.execute(fs.readFile, __filename);
+		
+		// handle uncaught exceptions only ONCE
+		process.once('uncaughtException', (err) => {
+			console.log(err);
+			process.exit(1);
+		});
+		
+	##### Arguments
+	
+		...args			// makes array of arguments
+		
+		
+		
+		
+		
+		
+### HTTP/HTTPS
+
+	5 main objects
+	
+	http.Server
+		inherits from net.Server/EE
+		basic server
+		event emitter
+	
+	http.Agent
+		manages pooling sockets for client requests
+		can create agents
+	
+	http.IncomingMessage
+	
+	http.ServerResponse
+		writable stream
+	
+	http.ClientResponse
+		client request object
+		writable stream
+		
+	
+		
+	##### URL
+	
+	url.parse {
+		protocol: 	'http',
+		slashes: 	true,
+		auth:		null,
+		host:		'www.pluralsight.com',
+		port:		null,
+		hostname:	'www.pluralsight.com',
+		hash:		null,
+		search:		'?q=buna',
+		query:		'q=buna',
+		pathname:	'/search',
+		path:		'/search?q=buna',
+		href:		'https://www.pluralsight.com/search?q=buna'
+	}
+		
+
+### Streams
+
+	fs
+		readableStream
+		writableStream
+		duplex			- read/write, like a socket
+		transform		- used for gzip
+		
+	consume streams via PIPE
+	
+	// src = readable stream
+	// dest = writable stream
+	
+	src.pipe(dest);
+		
+	implementing
+		use stream module
+				
+	consume
+		pipe or listen to stream events
+		
+		events
+			readable streams
+				data, end, error, close, readable
+				
+			writable streams
+				drain, finish, error, close, pipe/unpipe
+
+		functions
+			read
+				pipe, unpipe, read, unshift, resume, pause, isPaused, setEncoding
+			
+			write
+				write, end, cork, uncork, setDefaultEncoding
+				
+	readable streams
+		paused
+			start in paused model (pull mode)
+		flowing
+			in flowing mode we need to listen to events 
+			(data can be lost if no consumer)
+			(push mode)
+		
+=========================================================
+	Writable Stream implementation:
+		const { Writable } = require('stream');
+		const outStream = new Writable({
+			write(chunk, encoding, callback) {
+				console.log(chunk.toString());
+				callback();
+			}
+		});
+		
+		process.stdin.pipe(outStream);
+		
+		// or just use
+		process.stdin.pipe(process.stdout);
+===========================================================
+
+=========================================================
+	Readable Stream implementation:
+		const { Readable } = require('stream');
+		const inStream = new Readable();
+		inStream.push('abcdefghijklmnopqrstuvwxyz');
+		inStream.push(null);							// pushing null terminates the input
+		
+		inStream.pipe(process.stdout);
+		
+		//====================================================
+		// better to push data in the queue
+		const inStream = new Readable({
+			read(size) {
+				if(this.currentCharCode > 90) {
+					this.push(null);
+					return;
+				}
+
+				this.push(String.fromCharCode(this.currentCharCode++));
+			}
+		});
+		
+		inStream.currentCharCode = 65;
+		inStream.pipe(process.stdout);
+		
+		
+		process.on('exit', () => {
+			console.error(`currentCharCode is ${inStream.currentCharCode}`);
+		});
+		process.stdout.on('error', process.exit);
+
+===========================================================
+
+	Duplex Streams
+		both write and read methods need to be implemented
+		
+	
+	Transform Stream
+		only need a transform methods
+		signature of write methods
+		
+		const tx = new Transform({
+			transform(chunk, encoding, callback( {
+				this.push(chunk.toString().toUpperCase());
+				callback();
+			}
+		});
+
+		process.stdin.pipe(tx).pipe(process.stdout);
+
+	GZIP
+	const fs = require('fs');
+	const zlib = require('zlib');
+	const file = process.argv[2];
+	
+	fs.createReadStream(file)
+		.pipe(zlib.createGzip())
+		// give progress status
+		.on('data', () => process.stdout.write('.'))
+		.pipe(fs.createWriteStream(file + '.gz'))
+		// give finish text
+		.on('finish',() => console.log('done'));
+		
+	// can pipe methods on the stream
+	const progress = new Transform({
+		transform(chunk, encoding, callback) {
+			process.stdout.write('.');
+			callback(null, chunk);
+		}
+	});
+	// then add to the stream creation
+	//.pipe(progress)
+		
+	// crypto module allows piping data into encrypted data
+	//crypto.createCipher('aes192', 'a_secret'))
+	
+	// to unencrypt... we need to decrypt in reverse order
+	//crypto.createDecipher('aes192', 'a_secret'))
+	
+	
+	
+### Clusters and Child processes
+

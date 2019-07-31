@@ -1,0 +1,150 @@
+
+8igs32fUqA%2BLQKX6HXo1r2dv9ySrWvuYiOyCxYSILMDq8q9JB%2BKF9pkBWhef9UY6UTj%2FEXB1CKR94eKkWp5G3gKSPWs0GZVn9NaPx%2Fq%2Fuz06i47z3XsdKG%2BOkvLNMNy8nwKLgrKpuwudVMwZ%2F1clm5kZW0NTE%2Bx%2BGjD%2BUm%2BZTz2qos%2BnEAMoQl2ut%2FHhxoql2VIJ4OjIh6ti0X%2BscA4aNalOUBbSpG43YNo1otV%2BoFVjFYRJ0G0gQzyuNkYGA80D%2FqeE1YkdCyveAhRVfuaZoPgiagUqryx6KlIRJoonnb53ZWZNmSYvTxQoLmRN8T8u1VLr%2BxcsffJ0u4aefdreKywcwtnm9c8ev4hYc1OXiHAtF1S0qAfhkfXoNkekUUOYDC6a3sDOGUBVepVwW0JAz4WSDrirSn7oOvUJ7VY0plSUTMH47DUERo%2F5zwt%2BYJrf9Ves9ZVB5GUF0S8xuGUsAIEMVHpIJfqzXLqxQkQdR9PKv7Y3iVqf12YHGelHLFiZNAMomNdw9Rne03nwi0y%2Fa%2B16qUh%2BzPFUn1Obl7WXvmWg6btUj1YfwWd7NGOJHxfH
+
+
+#HTTP-Cookie Notes
+
+##cookie creation:
+
+	the web server sends a HTTP header (parts in square brackets are optional]
+		Set-Cookie: value[; expires=date][;domain=domain][;path=path][;'secure]
+		
+			name=value		// send to server w/ each request
+				value is stored in header "Cookie"; Cookie: value	// no other infor
+				
+			options:
+				// these are for the browsers use only and not retrievable once set
+				// if multiple cookies, they are separated by semicolon and space.
+				Cookie: value1; value2; name1=value1
+				// server-side allows to parse cookies
+
+##cookie encoding:
+	
+	3 chars needs to be encoded
+	// use url-encoding to be safe
+	[;, ] - semicolon, comma, space
+	example: name=value,   // the name and value are encoded separately and = is left alone
+	
+##cookie options (Directives):
+	####name=value
+		name cannot be control chars, spaces, tabs or ()<>@,;:\"/[]?={}
+		value can be anything and can be wrapped in "value"
+			// should be uri encoded
+
+	####expires:
+		the cookie should no longer be sent back to server and can be deleted
+		date format: DDD, DD-MMM-YYYY hh:mm:ss GMT
+		without this option the cookie is only good in the session (session cookie)
+		with this option the cookie is a (persistant cookie)
+		"Set-Cookie: name=Nicholas; expires=Sat, 02 May 2009 23:38:25 GMT"
+		change session cookie to persistant cookie - add expires date
+		change persistant cookie to session cookie - set expires to past date, then create new session cookie w/ same name	
+
+	####max-age
+		number of seconds until cookie expires
+		0 or -number will expire the cookie
+		if expires and max-age = max-age wins
+	
+	####domain:
+		indicates domains for which the cookie should be sent
+		default: hostname of the page setting the cookie
+		"Set-Cookie: name=Nicholas; domain=nczonline.net"
+		"Set-Cookie: name=Nicholas; domain=yahoo.com"		// covers all sites under yahoo.com
+		invalid domain options are ignored
+		
+	####path:
+		another way to control when cookie is sent
+		the url path must exist in the requested resource before sending the cookie header
+		if the req url path matches this value then the cookie header is sent
+		"Set-Cookie: name=Nicholas; path=/blog"
+		aboves matches on /blog, /blogroll, /blogmine
+		comparison done only once domain is verified
+		default: url that sent the Set-Cookie header
+		
+	####secure:
+		just a flag
+		a secure cookie will only be sent to the server if req is made using ssl and https
+		"Set-Cookie: name=Nicholas; secure"
+		cookies sent over https are automatically set to "secure"
+
+	####HttpOnly
+		once set, no access via document.cookie
+
+	####samesite
+		values can be "Strict", "Lax", "None"
+		helps prevent XSS
+
+##cookie restrictions:
+
+	2 types
+		number of cookies (browser specific... but ~50 cookies)
+		total cookie size (4KB)
+		
+##subcookies:
+
+	name-value pairs
+	"name=a=b&c=d&e=f&g=h"
+	used to hold more values w/o going over size limit
+	
+##cookies in javascript
+
+	create/update
+		you can create/manipulate/remove cookies in javascript using:
+		document.cookie - // acts as Set-Cookie header when assigned to and Cookie header when read from
+		must be same format as Set-Cookie
+		document.cookie="name=Mike; domain=yahoo.com; path=/"
+	
+	read
+		let data = document.cookie;
+
+##HTTP-Only cookies
+
+	cookie should never be accessed by javascript (document.cookie) to help  prevent XSS
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

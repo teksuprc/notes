@@ -1,0 +1,86 @@
+
+# question.
+	can we pull code from gitlab, then create a docker image
+
+
+
+
+// docker registry in gitlab
+
+project settings -> general -> permissions
+	repository
+		enable container registry
+
+
+// docker login
+docker login registry.gs.mil
+docker login registry.example.com -u <your_username> -p <your_access_token>
+
+// docker build
+docker build -t registry.gs.mil/uxd/ecobar-alerts .
+docker push registry.gs.mil/uxd/ecobar-alerts
+
+// different image names
+registry.gs.mil/uxd/ecobar-alerts:tag
+registry.gs.mil/uxd/ecobar-alerts/<optional-image-name>:tag
+registry.gs.mil/uxd/ecobar-alerts/<optional-name>/<optional-image-name>:tag
+
+
+=================================================================================
+
+
+// in the dockerfile add your updated ssh/config
+
+ADD ./config /root/.ssh/config
+ADD ./lift_key /root/.ssh/id_rsa 
+RUN chmod 400 /root/.ssh/id_rsa
+
+
+
+// add a config file at project root. Change the hostname
+
+Host gitlab-storefront
+  HostName gitlab.gs.mil
+  AddKeysToAgent yes
+  IgnoreUnknown UseKeychain
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+  User git
+  
+  
+  
+// in the jenkinsfile. lift_key is the id of your secret file in jenkins with the secret key
+
+def image_app = 'store-front-api'
+stage('Build') {
+	cleanWs()
+	checkout scm
+	withCredentials([file(credentialsId: 'lift_key_file', variable: 'lift_key')]) {
+		sh "cp $lift_key ./lift_key"
+		app = docker.build(image_app)
+		sh "docker run --rm -v $WORKSPACE:/code ${image_app} ./git-zip.sh"
+	}
+}
+	
+
+
+// devcorp nexus example
+https://gitlab.gs.mil/DevCorps/git-nexus-archiver/tree/master
+
+
+
+//============================================================
+// web-inventory dockerfile
+//============================================================
+FROM centos:7.6.1810
+
+ENV container docker
+
+RUN curl -sL https://rpm.nodesource.com/setup_8.x | bash 
+RUN yum -y install nodejs java-1.8.0-openjdk
+
+RUN npm install
+
+EXPOSE 8080
+
+RUN ./initial_setup.sh

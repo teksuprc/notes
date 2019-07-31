@@ -1,0 +1,653 @@
+
+## Node
+
+### What is Node?
+Node allows javascript execution on a servers
+Node is a wrapper around a VM like V8.
+built-in modules
+	fs
+	http
+	crypto
+	zip
+offers all async apis
+offers tooling options
+adds c++ addons
+powerful debugger and other utilities
+npm - package manager
+module dependency manager (CommonJS modules)
+https://jscomplete.com/why-node
+
+
+### Commands
+
+node
+	run scripts
+npm
+	install/remove/update packages/run scripts
+npx
+	execute external scripts
+
+
+### Getting Started
+
+jscomplete/ngs
+
+REPL
+	Read, Eval, Print, Loop
+	use ctrl + l to clear
+	.editor - opens an editor
+		ctrl + D to finish
+		ctrl + C to cancel
+	.help - list commands
+	.save test.js - saves defined functions in REPL
+	.load test.js - loads the previous defined functions
+	
+TAB completion
+	Array. double tab - lists all functions available to Array
+	c double tab -	lists all commands w/ c
+	_ - automatically stores the last value
+	
+Executing scripts
+	node <file path>
+
+Timers
+	setTimeout
+		delays execution
+		setTimeout(() => {}, delayInMills);
+		clearTimeout();
+	
+	setInterval
+		loops interval ever x milliseconds
+		setInterval( function(), timeInMills);
+		clearInterval();
+		
+CLI Commands
+	node -p "os.cpus().length"
+			"process.versions.v8"
+	node -h | less 
+	
+	node --v8-options 
+	
+Environment Variables
+	process object is a bridge to the OS
+
+	process.env.Variable
+	process.env.USER
+
+	export VAL1=100
+
+	process.argv:[...]
+	
+	stdout/stderr/stdin
+		console.log() - stdout = process.stdout.write('test');
+		
+### Modern Javascript
+
+##### Variables and Block Scope
+	block scope - {{{}}}}, valid nested block scopes
+	let - use to get rid of weird out of block scope access
+	const - used to define constant values... 
+		immutable for string and number values
+		arrays or objects - can be mutated
+
+##### arrow functions
+	() => { }
+	
+		const x = function() {
+			// this here is the caller of x
+		};
+		
+		const y = () => {
+			// this here is NOT the caller of y
+			// its the same this found in y's scope
+		};
+	
+		can remove return if function is one line
+		
+##### object literals
+	const obj = {};
+	dynamic property
+		const mystery = "answer";
+		const obj = {
+			p1: 10,
+			p2: 20,
+			[mystery]: 42
+		};
+		obj.mystery - is undefined;
+		obj.answer = 42;
+
+	shortcut syntax
+		const PI = Math.PI;
+		const obj = {
+			PI,
+			p1: 10,
+			p2: 20
+		};
+		
+		obj.PI - is same as Math.PI.
+
+##### destructuring and rest/spread
+	const { PI, E, Sqrt2 } = Math;
+		this is the same as
+			const PI = Math.PI;
+			const E = Math.E;
+			const Sqrt2 = Math.SQRT2;
+
+	can be use as parameters for a function
+		const area = ({w,h}) => {
+			w*h;
+		};
+		
+		usage:
+			const block = { w: 5, h: 4 };
+			area(block);
+
+	array values to variables
+	const [first,second,,forth] = [10,20,30,40];
+	
+	REST operator "..." - 
+		const [first,...restOfItems] = [10,20,30,40];
+			first = 10
+			restOfItems = [20,30,40]
+
+##### function default parameters
+	const func1 = (answer = 42) => {
+		console.log('what is the answer:', answer);
+	};
+	
+	// make the argument optional
+	const func1 = (a = 2, {b = 3} = {}) => {};
+	
+##### template strings
+	const str = `hello ${world}`;
+
+##### classes
+	class Person {
+		constructor(fname, lname) {
+			this.firstName = fname;
+			this.lastName = lname;
+			
+		greet() {
+			console.log(`Hello ${this.firstName}!`);
+		}
+	}
+	
+	class Student extends Person {
+		constructor(fname, lname, level) {
+			super(fname, lname);
+			this.level = level;
+		}
+		
+		greet() {
+			console.log(`Welcome to my class ${this.firstName} from ${this.level}`);
+		}
+	}
+
+	usage:
+		const o1 = new Person('Max', 'Test');
+		const o2 = new Student('Billy','Bob', '1st Grade');
+
+##### Promises and Async/Await
+	promises
+		Promise.resolve() - shortcut for manually created resolve
+		
+		Promise.all()/Promise.race() - running multiple promises in parallel
+		
+		Promise.all([func1(), func2(), func3()]).then(
+			([res1, res2, res3]) => {}
+		);
+		
+		see js_tests.html
+
+		const https = require('https');
+		
+		function fetch(url) {
+			return new Promise((resolve, reject) => {
+				https.get(url, (res) => {
+					let data = '';
+					res.on('data', (chunk) => data = data + chunk);
+					res.on('end', () => resolve(data));
+					res.on('error', reject);  // is the same as - res.on('error', (err) => reject(err));
+				});
+			});
+		};
+
+		usage:
+			fetch('https://www.cnn.com').then(
+				(data) => { console.log(data.length) },
+				(err) => {console.log(err) }
+			);
+	
+	async/await
+		use await before the promise 
+
+		(async function read() {
+			const data = await fetch('https://www.cnn.com');
+			console.log(data.length);
+		})();
+		
+		or
+		
+		async function read() {
+			const data = await fetch('https://www.cnn.com');
+			console.log(data.length);
+		};
+		
+		read();
+
+### NPM
+
+##### NPM Commands
+	npm install <package>
+		shortcut: npm i <package>
+		
+	-g - global
+	--save - save to package.json
+	--save-dev - save only for dev in package.json
+	
+	-D - save dev dependency
+
+##### package.json/package-lock.json
+	npm i - builds based on package.json
+	
+	npm init - creates a package.json
+		--yes - use defaults
+	
+	package-lock.json - defines the dependency versions
+
+##### semantic versioning semver
+	version number
+		4.2.0
+		4 = major - breaking changes
+		2 = minor - changes are backward compatible
+		0 = patch - bug/security fixes
+
+		~ - can install most recent patched version ie. 4.2.x
+		^ - can install most recent minor version ie. 4.x.x
+		4.x (can be used)
+		= - exact version
+		
+##### Installing and Using NPM Packages
+	locally or globally
+	-g - global
+	local is default
+		
+##### Create/Publish NPM Package
+	mkdir for package name
+	index.js - node looks for this file
+	
+	in node we can create modules and functions with:
+	module.exports = function print(msg) { console.log(msg); };
+	exports.<variable> = function test() {};
+
+##### NPX and Scripts
+	npx jest - run jest...
+	node package execute
+
+##### NPM Update
+	npm ls - list packages
+	
+	npm update
+
+	npm rm <package>
+
+### Modules and Concurrency
+
+##### Define Modules
+	module - file/folder that contains code
+	module is wrapped by a function and uses arguments keyword
+		in node...it wraps every file
+			args => 5 args... passed by node
+			
+			internals
+				function(exports, module, require, __filename, __dirname)
+				
+				exports/module - define module
+					module.exports - is what is returned by node
+					exports - is an alias for module.exports
+				require - allows dependencies to be retrieved
+				__filename - current file path
+				__dirname - current dir path
+
+				returns module.exports property
+				
+				//exports = () => {}; // not ok bc it overwrites module.exports
+				//module.exports = () => {}; // is ok, bc it returned the function
+				
+##### Examples
+###### 1 - Top Level - Simple Object
+//===========================================================
+definition:
+	exports.language = 'en';
+	exports.direction = 'rtl'; // right to left
+	exports.encoding = 'utf-8';
+usage:
+	const api = require('./simpleObj');
+	console.log(api.language, api.direction, api.encoding);
+//===========================================================
+
+###### 2 - Top Level - Array
+//===========================================================
+definition:
+	module.exports = [2,3,4,5,6,7];
+usage:
+	const api = require('./array');
+	console.log(api);	// expected - [2,3,4,5,6,7]
+//===========================================================
+	
+###### 3 - Top Level - String
+//===========================================================
+definition:
+	module.exports = `
+	<!doctype html>
+	<html>
+		<body>
+			<div>Test</div>
+		</body>
+	</html>`;
+usage:
+	const api = require('./string');
+	console.log(api);
+//===========================================================
+
+###### 4 - Top Level - Function
+//===========================================================
+definition:
+	module.exports = (title) => `
+		<!doctype html>
+		<html>
+			<body>
+				<div>Test</div>
+			</body>
+		</html>`;
+usage:
+	const api = require('./simpleObj');
+	console.log(api('test'));
+//===========================================================
+
+##### Nodes Global Object
+	global - node provides a global object
+	**** DO NOT USE anything global
+	
+##### Event Loop
+	node does async... no need for threads
+	
+##### Errors vs Exceptions
+	error - problem, or unknown error
+	exception - is a condition
+		try/catch and throw
+
+##### Node Clusters
+	node process for each core
+	single cpu - still run node cluster
+		node monitors single cluster process and if it shutsdown, node picks it back update
+		
+	production process manager
+		pm2 - tool used for clusters
+
+##### Node Async Patterns
+
+###### Sync
+	const data = fs.readFileSync(filePath);
+	console.log('file data', data);
+
+###### Async
+	// Error first callback pattern
+	fs.readFile(__filename, function callback(err, data) {
+		console.log('file data', data);
+	});
+
+	// callbacks
+		drawbacks - pyramid of doom
+			nested for callbacks that rely on other callbacks
+
+		work around
+			promise library
+			
+				const util = require('util');
+				const newReadFile = util.promisify(fs.readFile);
+				async function main() {
+					const data = await newReadFile(__filename);
+					console.log('file data', data);
+				};
+				
+				main();
+				
+				// other way
+				const { readFile } = require('fs').promises;
+				async function main() {
+					const data = await readFile(__filename);
+					console.log('file data', data);
+				};
+
+	// promise nesting	
+		async function main() {
+			const data = await readFile(__filename);
+			await fs.writeFile(__filename + '.copy', data);
+		};
+		
+##### Event Emitters
+	const EventEmitter = require('events');
+	
+	// streams are event emitters
+	// process.stdin, process.stdout
+	
+	const myEmitter = new EventEmitter();
+
+	myEmitter.on('test_event', (data) => {
+		console.log('got event', data);
+	});
+
+	//setImmediate(() => {		// setImmediate allows for execution after event loop is called
+	myEmitter.emit('test_event', data);
+	//});
+
+### Web Servers
+
+	http/https - built-in modules
+	express - need to install module from npm
+
+##### Server Request/Response	
+	const http = require('http');	
+	const requestListener = (req, res) => {
+		res.end('Hello World!\n');
+		
+		//.end is the same as .write with .end()
+		//.end tells that we are done and send response
+	});
+	
+	//const server = http.createServer((req,res) => {
+	//	res.end('Hello World!\n');
+	//});
+	const server = http.createServer(requestListener);
+	
+	// server is same as EventEmitter
+	//server.on('request', requestListener);
+	
+	// args: port, callback
+	server.listen(4242, () => {
+		console.log('server is listening...');
+	});
+
+##### Monitor File Changes
+	nodemon - read os file changes and restart node
+	nodemon <program to run.js>
+	
+	not for production
+	
+	*****
+	to read properties w/ a depth use:
+	// depth = do not print nested objects only first level properties
+	console.dir(req, { depth: 0 });
+	*****
+	
+	Req/Res objects
+		both are streams
+
+	manually parse body request for POSTs
+
+##### Web Frameworks
+	express
+		const express = require('express');
+		const app = express();
+
+		app.get('/', (req,res) => {
+			//res.send('Hello Worlds!');
+			res.send({a:42,b:32});
+		});
+
+		app.listen(4242, () => {
+			console.log('server started...');
+		});
+
+	KOA - more modern
+	SAILS - inspired by rails
+	Meteor - more integrated way to build web servers
+	
+##### Web Templates
+	pug - based on indents
+	ejs - 
+		<%= val %>
+		<% if(val) {%>
+			...
+		<% } %>
+		<%- javascript -%>
+	handlebars - 
+		{{ <value that is html safe> }}
+		{{{ <value that is not parsed }}}
+	react - 
+		jsx
+		
+### Working with OS
+	modules for working with system level tasks
+		os
+			EOL
+			platform - what is the platform
+			arch - architecture
+			cpus
+			homedir
+			freemem - how much free memory do we have
+			release
+			tmpdir
+			totalmem
+			type
+			uptime
+			userInfo
+			networkInterfaces
+			loadavg
+			hostname
+			endianness - (mac/pc) big/little
+			Constants
+		fs
+			readFile/writeFile - async/sync
+			fsWatcher - watch file/directory
+			stats - file attributes
+			chown/chmod
+			truncate
+			mkdir
+			copy
+			rename
+			buffer api
+			exists
+			unlink - remove file
+			watch - watch file for changes
+			access
+		child_process
+			exec
+			execFile
+			fork	 - create sub process
+			spawn	 - run commands
+				const { spawn } = require('child_process');
+				const pwd = spawn('pwd');
+				pwd.stdout.pipe(process.stdout);
+				See node_tests/servers/server.js
+				
+			
+### Debugging
+	use command to inspect
+	node --inspect-brk <file.js>
+		use chrome
+			chrome://inspect
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

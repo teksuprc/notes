@@ -1,0 +1,148 @@
+
+
+instead of multiple rest queries... graphql allows us to structure our return in one rest call
+
+// get book and author and list of their books by name
+// note: circular ref?????
+{
+	book(id:123) {
+		title
+		genre
+		reviews
+		author {
+			name
+			bio
+			books {
+				name  
+			}
+		}
+	}
+}
+
+// get smaller dataset
+{
+	book(id:123) {
+		title
+		author {
+			name
+			books {
+				name
+			}
+		}
+	}
+}
+
+
+backend node/graphql <=> frontend react
+
+tech stack:
+	server
+		node
+		express
+		graphql
+			mongodb
+	
+	client
+		react
+		apollo
+		 (graphiql) - dummy app for testing
+		 
+
+		 
+// schema - takes dataType and resolver
+
+	json data:
+		"books": [{
+			"id": "0",
+			"name": "The High Castle",
+			"genre": "Fantasy",
+			"authorId": "0"
+		},{
+			"id": "1",
+			"name": "Valley of Dragons",
+			"genre": "Fantasy",
+			"authorId": "3"
+		}],
+		"authors": [{
+			"id": "0",
+			"name": "Jimmy James",
+			"age": 45
+		},{
+			"id": "1",
+			"name": "Steve Richardson",
+			"age": 27
+		}]
+
+		
+	data types:
+		const BookType = new GraphQLObjectType({
+			name: "Book",
+			fields: () => ({
+				id: {type: GraphQLID},
+				name: {type: GraphQLString},
+				genre: {type: GraphQLString},
+				author: {type: AuthorType, resolve: (parent, args) => authorData.find(a => a.id === parent.authorId) }
+			})
+		});
+
+		const AuthorType = new GraphQLObjectType({
+			name: "Author",
+			fields: () => ({
+				id: {type: GraphQLID},
+				name: {type: GraphQLString},
+				age: {type: GraphQLInt},
+				books: { type: GraphQLList(BookType), resolve(parent, args) { return bookData.filter(b => b.authorId === parent.id); } }
+			})
+		});
+		
+		
+	resolvers (query definitions)
+		const RootQuery = new GraphQLObjectType({
+			// { book(id:"1"){ id name genre } }
+			book: {
+				type: BookType,
+				args: { id: { type: GraphQLID } },
+				// we have access to args.id, bc it was defined in the line above
+				// get data from db/other source
+				resolve(parent, args) { return bookData.find(b => b.id === args.id); }
+			},
+			// { books{ id name genre } }
+			books: {
+				type: GraphQLList(BookType),
+				resolve() { return bookData; }
+			},
+			// { author(id:"1"){ id name age } }
+			author: {
+				type: AuthorType,
+				args: { id: { type: GraphQLID } },
+				resolve(parent, args) { return authorData.find(a => a.id === args.id); }
+			},
+			// { authors{ id name age } }
+			authors: {
+				type: GraphQLList(AuthorType),
+				resolve() { return authorData; }
+			}
+		});
+		
+	schema
+		// we export the schema object and put it into graphiql
+		app.use('/api', graphqlHTTP({
+			schema: schema,
+			graphiql: true
+		}));
+		
+		// actual schema
+		const schema = new GraphQLSchema({
+			query: RootQuery
+		});
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

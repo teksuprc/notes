@@ -1,0 +1,66 @@
+// service workers
+
+	promise based
+	
+	used for push to client
+	
+	needs 2 apis
+		fetch
+		cache
+		
+	only available on https/TLS
+		
+	use case
+		app -> service worker -> online  -> server
+							  -> offline -> offline cache
+							  
+	starting point for apps to work like native apps
+		push message
+		notification
+		cache
+	
+	background sync - used when user doesn't have stable connectivity
+	
+	3 steps in life cycle
+		1) registration
+			if(!('serviceWorker' in navigator)) {
+				console.log('sw not supported');
+				return;
+			}
+			navigator.serviceWorker
+			  .register('/service-worker.js', {scope: '/app/'})		// files lower than /app/
+			  .then((registration) => {
+			    console.log('sw registered! scope is: ', registration.scope);
+			  })
+			  .catch(err => console.log(err));
+		2) installation
+			installs the service worker if its new or has been updatedb (bit difference)
+			// install events for things like caching assets/data
+			self.addEventListener('install', (event) => {
+				// do stuffs here
+			});
+		3) activation
+			self.addEventListener('activate', (event) => {
+				// service worker controls all pages within its scope
+				// and intercept all requests in its control
+				// opened pages will not work w/o refresh
+			});
+
+NOTE: service worker scope is the directory its in and has access to tree below, and intercepts requests for data
+
+	Events
+		install
+			cache assets/data
+		activate
+			clean up stale data
+		message
+		fetch
+			everytime a resource is requested - from cache if its there
+		sync
+			listen to sync events for data updates, etc...
+		push
+			self.addEventListener('push', (event) => {
+				event.waitUtil(
+					self.registration.showNotification('Hello', options);
+				);
+			});

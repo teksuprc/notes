@@ -1,0 +1,224 @@
+
+# Machine Learning
+
+	2 things
+		aquire knowledge - rules that explain observations
+		inference - ability to aquire knowledge to make plans
+
+	supervised
+		a teacher 
+		
+		algorithms:
+			binary classification - label in 2 possible ways
+			regression - solves a numeric value based on input parameters
+			linear function - find a line thru the data
+			logistic regression - apply log curve
+			svm - support vector machine - 
+			perceptron - ann - artificial neural network
+			
+			random forest
+			xgboost - strong classifier out of many weak classifiers
+		
+	unsupervised
+		cluster algorithms
+		random cut forest
+		topic modeling - top words that define the topic
+		k-means clustering - 
+		principal component analysis (pca) - reduces dimensionality within dataset
+		latent dirichlet allocation (lda) - topic modeling
+		anomoly detection
+		hot spot detection - id dense regions in data
+		
+	reinforcement
+		learning environment via trial and error
+		
+	deep learning
+		neural networks
+			vector of numeric input values
+			weighted sum then activation function
+		cnn's
+		
+		
+
+# AWS SageMaker
+
+	fully managed service
+	build, train, and deploy ML models
+	3 major components
+		sagemaker notebooks service
+		sagemaker training service
+		sagemaker hosting service
+
+	pip or conda install package deps and they will persist on the notebook instance
+	
+	type and # of EC2 instances needed... aws builds the training environment and tears down the environment
+	add custom algorithms via docker images
+
+### Challenges
+
+	1) which framework
+	2) create models
+	3) train models to make predictions
+	4) integrate into an application
+	5) deployment
+	
+	SageMaker NEO = framework to NEO conversion to platform
+		neo compiler
+		neo runtime library
+		
+		
+	
+	
+
+# AWS Authentication and Authorization IAM - Identity and Access Management
+
+### User
+	a perminently named operator
+		credentials are perminent and attached to user (authentication method)
+
+### Group
+	a collection of users
+
+### Role
+	is not your permissions
+	is an authentication method
+	creds are temporary
+
+### Policy Docs
+	authorization
+	json doc
+	attached to a user, group, or role
+	lists apis that are allowed and on which resources
+	lists conditions access is allowed
+	
+	object -> api -> s3
+		put with creds 
+
+	explicit deny - overrides any allow statement, can perminently prevent actions
+	functions NEED to be whitelisted, else there is an implicit deny
+	
+
+# AWS S3 (Simple Storage Service)
+	
+### Storage types
+	
+	Block
+		storage arrays on disks
+		EBS - elastic block storage
+		
+	File
+		ntfs, etc... contains attributes such as permissions
+		EFS - elastic file system
+			simple scalable for EC2 instances or on prem via direct connect
+
+	Object 
+		flat system stored as objects
+		almost limitless storage
+		S3 - simple storage service
+		
+	pay for what you use
+	11 9's of durability 99.999999999%
+	storage classes and transitions
+		S3 standard
+			pay for object stored
+			pay for request charges
+
+		S3 intelligent-tiering
+			pay for object stored
+			pay monthly monitoring fee
+			pay for delete, overwritten, transitioned btwn storage classes before minimum storage has passed (30 day)
+
+		S3 standard - infrequent access
+		S3 One Zone - infrequent access
+			pay for objects stored
+			pay for delete, overwritten, transitioned btwn storage classes before minimum storage has passed (30 day)
+			pay for object size (128 kb)
+
+		S3 Glacier
+			pay for objects stored
+			requests per object and per byte restored
+			deleting an object before 90 day minimum commitment
+			put, copy, or transition - higher than S3
+			fixed amount of storage (requires 32kb per object) (min 8kb object size)
+			
+		S3 Glacier Deep Archive
+			pay for objects stored
+			request per object and per byte restored
+			delete object before 180 days
+			min 8kb object size
+			requires 32kb per object
+			put, copy, or transition
+		
+	stored objects in buckets
+	object 
+		data
+		metadata
+		access via
+			Amazon S3 console
+			aws cli
+			aws sdk(api)
+		
+##### Use cases
+		backup storage
+		media hosting
+		application assets
+		data lake
+		content delivery
+		
+##### Charges in S3
+	
+	pay as you go
+	pay what you use
+	
+	storage 			- based on object size, how long during month, and storage class	
+	requests			- get, put, copy, and lifecycle actions (30 days of inactivity) transition from s3 storage class to s3 archive storage
+	management			- management features, inventory, analytics, and object tagging
+	data transfer		- all data in/out except: 
+							in from internet
+							out from EC2 within same Region as S3
+							out to CloudFront
+	storage classes		- see above
+	
+	Cost Explorer API 	- has a charge for access
+	
+	
+	
+
+# AWS Elasticache
+
+### in memory data store in the cloud
+
+	fast managed in-memory data store
+	
+	cache node - fixed sized
+		can be single or clustered
+		each node runs an instance of either (memcached or redis)
+		
+		apps using redis or memcached should be able to use elasticache w/ almost no modification
+		used for high performance use cases
+		
+		great for small static data, or metadata
+		great for compute workloads
+		
+		memcached can scale to 20 nodes per cluster
+		redis can scale to 90 nodes per cluster
+		
+		redis - HA through multiple availablility zones
+		memcached - data is partitioned across all nodes in cluster
+		
+	Lazy Loading
+		load data in cache only when necessary
+		
+		server -> cache -> backing db
+					(if data is current) else data is grabbed from db
+					
+	Write Throught
+		updates cache when data is changed, then written to db
+		server -> cache -> db 
+					(cache updates db)
+					
+	Adding TTL
+		Time to live - number of seconds or ms for data to expire
+		
+		
+	
