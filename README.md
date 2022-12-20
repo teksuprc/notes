@@ -9,6 +9,3 @@ coordinates:
 3. 6633 3352		 8. 8369 6769
 4. 8475 0061		 9. 5263 8012
 5. 7757 5145		10. 7435 0928
-
-https://v.redd.it/g8m2c77x2as21/DASH_240
-https://www.reddit.com/r/gameofthrones/
