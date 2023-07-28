@@ -14,3 +14,13 @@ these are the other coords:
 981179    510063  
 959980    506177  
 971296    491476  
+
+
+Two-Factor Authentication Backup Codes
+Workspace: BlackCape - https://blackcape-io.slack.com/
+Email: russ@blackcape.io
+
+981179
+510063
+506177
+971296
