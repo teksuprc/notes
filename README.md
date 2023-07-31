@@ -1,7 +1,6 @@
 # notes
 
 russell.e.chandler
-jvi42365
 
 coordinates:
 1. 0930 7254		 6. 7942 0938
@@ -15,12 +14,9 @@ these are the other coords:
 959980    506177  
 971296    491476  
 
+blackcape-io
 
-Two-Factor Authentication Backup Codes
-Workspace: BlackCape - https://blackcape-io.slack.com/
-Email: russ@blackcape.io
-
-981179
-510063
-506177
-971296
+981 179
+510 063
+506 177
+971 296
