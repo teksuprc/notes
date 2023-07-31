@@ -16,7 +16,7 @@ these are the other coords:
 
 blackcape-io
 
-981 179
-510 063
-506 177
+981 179  
+510 063  
+506 177  
 971 296
